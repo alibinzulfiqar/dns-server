@@ -153,21 +153,42 @@ A modern, full-featured DNS management system with a beautiful web interface, bu
 
 ## Deployment on Coolify
 
-1. **Create a new project** in Coolify
+### Step 1: Create New Service
+1. Go to your Coolify dashboard
+2. Create a new **Docker Compose** service
+3. Connect your GitHub repository
 
-2. **Add the repository** as a source
+### Step 2: Required Environment Variables
+Add these in Coolify's environment variables section:
 
-3. **Configure environment variables** in Coolify:
-   - `DB_PASSWORD` - Secure database password
-   - `JWT_SECRET` - Secure JWT secret (32+ characters)
-   - `FRONTEND_URL` - Your domain URL
+| Variable | Required | Example Value |
+|----------|----------|---------------|
+| `DB_PASSWORD` | ✅ Yes | `MySecurePassword123!` |
+| `JWT_SECRET` | ✅ Yes | `your-32-char-random-secret-key-here` |
 
-4. **Deploy using Docker Compose**
-   - Select `docker-compose.yml` as the deployment method
-   - Coolify will automatically build and deploy all services
+### Step 3: Optional Environment Variables
 
-5. **Configure persistent volumes** (if needed)
-   - Ensure PostgreSQL data persists across deployments
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `APP_PORT` | `8580` | External port (change if conflicts exist) |
+| `DB_USER` | `postgres` | Database username |
+| `DB_NAME` | `dns_manager` | Database name |
+| `FRONTEND_URL` | (empty/wildcard) | For CORS restrictions |
+
+### Step 4: Deploy
+- Click Deploy
+- Wait for all containers to be healthy
+- Access via: `http://your-server-ip:8580`
+
+### Troubleshooting Coolify Deployment
+
+**Port Conflict?** Change `APP_PORT` to another value (e.g., `8581`, `8590`)
+
+**Build Failing?** Check that both `backend/package-lock.json` and `frontend/package-lock.json` exist
+
+**Container Names Conflict?** All containers use unique `dns-manager-*` prefix to avoid conflicts
+
+**Network Issues?** Uses isolated `dns-manager-network` network
 
 ## API Endpoints
 
@@ -204,22 +225,22 @@ A modern, full-featured DNS management system with a beautiful web interface, bu
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment mode | `development` |
-| `PORT` | Backend port | `3001` |
-| `DB_HOST` | PostgreSQL host | `postgres` |
-| `DB_PORT` | PostgreSQL port | `5432` |
-| `DB_NAME` | Database name | `dns_manager` |
-| `DB_USER` | Database user | `postgres` |
-| `DB_PASSWORD` | Database password | - |
-| `JWT_SECRET` | JWT signing secret | - |
-| `JWT_EXPIRES_IN` | JWT expiration | `7d` |
-| `USE_MOCK_DNS` | Use mock DNS server | `true` |
-| `PDNS_API_URL` | PowerDNS API URL | - |
-| `PDNS_API_KEY` | PowerDNS API key | - |
-| `FRONTEND_URL` | Frontend URL for CORS | `http://localhost` |
-| `FRONTEND_PORT` | Frontend exposed port | `80` |
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `DB_PASSWORD` | Database password | - | ✅ Yes |
+| `JWT_SECRET` | JWT signing secret | - | ✅ Yes |
+| `APP_PORT` | External app port | `8580` | No |
+| `NODE_ENV` | Environment mode | `production` | No |
+| `PORT` | Backend internal port | `3001` | No |
+| `DB_HOST` | PostgreSQL host | `dns-postgres` | No |
+| `DB_PORT` | PostgreSQL port | `5432` | No |
+| `DB_NAME` | Database name | `dns_manager` | No |
+| `DB_USER` | Database user | `postgres` | No |
+| `JWT_EXPIRES_IN` | JWT expiration | `7d` | No |
+| `USE_MOCK_DNS` | Use mock DNS server | `true` | No |
+| `PDNS_API_URL` | PowerDNS API URL | - | No |
+| `PDNS_API_KEY` | PowerDNS API key | - | No |
+| `FRONTEND_URL` | Frontend URL for CORS | (wildcard) | No |
 
 ### PowerDNS Integration
 
