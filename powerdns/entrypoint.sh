@@ -36,13 +36,9 @@ default-soa-content=ns1.@ hostmaster.@ 0 10800 3600 604800 3600
 
 # Allow zone transfers
 allow-axfr-ips=127.0.0.0/8,::1
-
-# Security
-setgid=pdns
-setuid=pdns
 EOF
 
 echo "PowerDNS configuration generated"
 
-# Start PowerDNS
-exec /usr/sbin/pdns_server --config-dir=/etc/powerdns
+# Start PowerDNS (runs as pdns user internally)
+exec /usr/sbin/pdns_server --config-dir=/etc/powerdns --setuid=pdns --setgid=pdns
