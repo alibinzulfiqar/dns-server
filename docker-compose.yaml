@@ -40,8 +40,8 @@ services:
       PDNS_DB_PASSWORD: ${DB_PASSWORD:?Database password is required}
       PDNS_AUTH_API_KEY: ${PDNS_API_KEY:-pdns-secret-api-key}
     ports:
-      - "53:53/udp"
-      - "53:53/tcp"
+      - "${DNS_PORT:-5353}:53/udp"
+      - "${DNS_PORT:-5353}:53/tcp"
     networks:
       - dns-manager-network
     healthcheck:
