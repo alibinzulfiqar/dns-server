@@ -47,7 +47,7 @@ services:
     networks:
       - dns-manager-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/api/v1/servers/localhost"]
+      test: ["CMD-SHELL", "nc -z localhost 53 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
