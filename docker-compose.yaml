@@ -2,18 +2,18 @@ version: '3.8'
 
 services:
   # PostgreSQL Database
-  postgres:
+  dns-postgres:
     image: postgres:16-alpine
-    container_name: dns-postgres
+    container_name: dns-manager-postgres
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?Database password is required}
       POSTGRES_DB: ${DB_NAME:-dns_manager}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - dns_postgres_data:/var/lib/postgresql/data
     networks:
-      - dns-network
+      - dns-manager-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-dns_manager}"]
       interval: 10s
@@ -22,19 +22,19 @@ services:
       start_period: 30s
 
   # Backend API
-  backend:
+  dns-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: dns-backend
+    container_name: dns-manager-backend
     restart: always
     depends_on:
-      postgres:
+      dns-postgres:
         condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 3001
-      DB_HOST: postgres
+      DB_HOST: dns-postgres
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-dns_manager}
       DB_USER: ${DB_USER:-postgres}
@@ -46,9 +46,9 @@ services:
       PDNS_API_KEY: ${PDNS_API_KEY:-}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
     volumes:
-      - backend_logs:/app/logs
+      - dns_backend_logs:/app/logs
     networks:
-      - dns-network
+      - dns-manager-network
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
       interval: 30s
@@ -57,19 +57,19 @@ services:
       start_period: 40s
 
   # Frontend
-  frontend:
+  dns-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: dns-frontend
+    container_name: dns-manager-frontend
     restart: always
     depends_on:
-      backend:
+      dns-backend:
         condition: service_healthy
     ports:
-      - "3000:80"
+      - "${APP_PORT:-8580}:80"
     networks:
-      - dns-network
+      - dns-manager-network
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80"]
       interval: 30s
@@ -78,11 +78,11 @@ services:
       start_period: 30s
 
 volumes:
-  postgres_data:
+  dns_postgres_data:
     driver: local
-  backend_logs:
+  dns_backend_logs:
     driver: local
 
 networks:
-  dns-network:
+  dns-manager-network:
     driver: bridge
