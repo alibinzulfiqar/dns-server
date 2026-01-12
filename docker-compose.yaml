@@ -39,9 +39,11 @@ services:
       PDNS_DB_USER: ${DB_USER:-postgres}
       PDNS_DB_PASSWORD: ${DB_PASSWORD:?Database password is required}
       PDNS_AUTH_API_KEY: ${PDNS_API_KEY:-pdns-secret-api-key}
+      SERVICE_FQDN_POWERDNS: ${SERVICE_FQDN_POWERDNS:-}
     ports:
       - "${DNS_PORT:-5353}:53/udp"
       - "${DNS_PORT:-5353}:53/tcp"
+      - "8081"
     networks:
       - dns-manager-network
     healthcheck:
