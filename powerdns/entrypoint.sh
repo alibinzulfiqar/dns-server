@@ -53,5 +53,17 @@ cat /etc/powerdns/pdns.conf | grep -v password
 
 echo "Starting PowerDNS server..."
 
+# Find pdns_server binary
+PDNS_BIN=$(which pdns_server || find /usr -name "pdns_server" 2>/dev/null | head -1)
+
+if [ -z "$PDNS_BIN" ]; then
+  echo "ERROR: pdns_server binary not found!"
+  echo "Searching for pdns binaries..."
+  find /usr -name "pdns*" 2>/dev/null
+  exit 1
+fi
+
+echo "Found PowerDNS at: $PDNS_BIN"
+
 # Start PowerDNS
-exec /usr/sbin/pdns_server --config-dir=/etc/powerdns
+exec $PDNS_BIN --config-dir=/etc/powerdns
