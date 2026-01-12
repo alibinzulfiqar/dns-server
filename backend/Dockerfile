@@ -3,7 +3,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Install dependencies
-COPY package*.json ./
+COPY package*.json package-lock.json ./
 ENV NODE_ENV=production
 RUN npm ci
 
