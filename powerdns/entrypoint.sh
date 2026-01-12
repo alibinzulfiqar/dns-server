@@ -14,6 +14,7 @@ echo "Database is ready!"
 # Create PowerDNS schema if not exists
 echo "Ensuring PowerDNS schema exists..."
 PGPASSWORD=${PDNS_DB_PASSWORD} psql -h ${PDNS_DB_HOST:-dns-postgres} -U ${PDNS_DB_USER:-postgres} -d ${PDNS_DB_NAME:-dns_manager} << 'EOSQL'
+-- Create domains table
 CREATE TABLE IF NOT EXISTS domains (
   id                    SERIAL PRIMARY KEY,
   name                  VARCHAR(255) NOT NULL,
@@ -26,6 +27,29 @@ CREATE TABLE IF NOT EXISTS domains (
   catalog               TEXT DEFAULT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS name_index ON domains(name);
+
+-- Add missing columns if table existed before
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='domains' AND column_name='master') THEN
+    ALTER TABLE domains ADD COLUMN master VARCHAR(128);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='domains' AND column_name='last_check') THEN
+    ALTER TABLE domains ADD COLUMN last_check INT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='domains' AND column_name='notified_serial') THEN
+    ALTER TABLE domains ADD COLUMN notified_serial BIGINT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='domains' AND column_name='account') THEN
+    ALTER TABLE domains ADD COLUMN account VARCHAR(40);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='domains' AND column_name='options') THEN
+    ALTER TABLE domains ADD COLUMN options TEXT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='domains' AND column_name='catalog') THEN
+    ALTER TABLE domains ADD COLUMN catalog TEXT;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS records (
   id                    BIGSERIAL PRIMARY KEY,
