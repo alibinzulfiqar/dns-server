@@ -2,8 +2,8 @@ FROM powerdns/pdns-auth-49:latest
 
 USER root
 
-# Install netcat for healthcheck and db wait
-RUN apt-get update && apt-get install -y netcat-openbsd curl && rm -rf /var/lib/apt/lists/*
+# Install netcat for healthcheck and db wait, psql for schema creation
+RUN apt-get update && apt-get install -y netcat-openbsd curl postgresql-client && rm -rf /var/lib/apt/lists/*
 
 # Copy entrypoint script with execute permissions
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
