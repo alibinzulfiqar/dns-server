@@ -11,8 +11,4 @@ COPY --chmod=755 entrypoint.sh /entrypoint.sh
 # Expose DNS and API ports
 EXPOSE 53/udp 53/tcp 8081
 
-# Healthcheck - check if DNS port 53 is listening
-HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=10 \
-  CMD nc -z localhost 53 || exit 1
-
 ENTRYPOINT ["/entrypoint.sh"]
