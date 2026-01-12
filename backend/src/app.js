@@ -10,6 +10,7 @@ const fs = require('fs');
 const sequelize = require('./models');
 const logger = require('./config/logger');
 const errorHandler = require('./middleware/errorHandler');
+const seedDatabase = require('./seed');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -78,11 +79,12 @@ const startServer = async () => {
     await sequelize.authenticate();
     logger.info('Database connection established successfully');
 
-    // Sync database models
-    if (process.env.NODE_ENV !== 'production') {
-      await sequelize.sync({ alter: true });
-      logger.info('Database models synchronized');
-    }
+    // Sync database models (always sync in production for this app)
+    await sequelize.sync({ alter: true });
+    logger.info('Database models synchronized');
+
+    // Seed default admin user
+    await seedDatabase(sequelize);
 
     // Start server
     app.listen(PORT, () => {

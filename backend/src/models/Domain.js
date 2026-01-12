@@ -32,12 +32,12 @@ const Domain = sequelize.define(
     soaPrimary: {
       type: DataTypes.STRING(255),
       allowNull: true,
-      defaultValue: 'ns1.example.com',
+      defaultValue: 'dns1.hopevalley.cloud',
     },
     soaEmail: {
       type: DataTypes.STRING(255),
       allowNull: true,
-      defaultValue: 'hostmaster.example.com',
+      defaultValue: 'hostmaster.hopevalley.cloud',
     },
     soaSerial: {
       type: DataTypes.BIGINT,
