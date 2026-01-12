@@ -47,11 +47,11 @@ services:
     networks:
       - dns-manager-network
     healthcheck:
-      test: ["CMD", "pdns_control", "ping"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/api/v1/servers/localhost"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 30s
+      retries: 10
+      start_period: 60s
 
   # Backend API
   dns-backend:

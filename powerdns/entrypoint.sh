@@ -1,6 +1,16 @@
 #!/bin/sh
 set -e
 
+echo "Starting PowerDNS setup..."
+
+# Wait for database to be ready
+echo "Waiting for database connection..."
+until nc -z ${PDNS_DB_HOST:-dns-postgres} ${PDNS_DB_PORT:-5432}; do
+  echo "Database not ready, waiting..."
+  sleep 2
+done
+echo "Database is ready!"
+
 # Generate pdns.conf from template with environment variables
 cat > /etc/powerdns/pdns.conf << EOF
 # PowerDNS Authoritative Server Configuration
@@ -12,7 +22,7 @@ gpgsql-port=${PDNS_DB_PORT:-5432}
 gpgsql-dbname=${PDNS_DB_NAME:-dns_manager}
 gpgsql-user=${PDNS_DB_USER:-postgres}
 gpgsql-password=${PDNS_DB_PASSWORD}
-gpgsql-dnssec=yes
+gpgsql-dnssec=no
 
 # API Configuration
 api=yes
@@ -29,7 +39,7 @@ daemon=no
 guardian=no
 disable-syslog=yes
 log-dns-queries=yes
-loglevel=4
+loglevel=6
 
 # SOA defaults
 default-soa-content=ns1.@ hostmaster.@ 0 10800 3600 604800 3600
@@ -38,7 +48,10 @@ default-soa-content=ns1.@ hostmaster.@ 0 10800 3600 604800 3600
 allow-axfr-ips=127.0.0.0/8,::1
 EOF
 
-echo "PowerDNS configuration generated"
+echo "PowerDNS configuration generated:"
+cat /etc/powerdns/pdns.conf | grep -v password
 
-# Start PowerDNS (runs as pdns user internally)
-exec /usr/sbin/pdns_server --config-dir=/etc/powerdns --setuid=pdns --setgid=pdns
+echo "Starting PowerDNS server..."
+
+# Start PowerDNS
+exec /usr/sbin/pdns_server --config-dir=/etc/powerdns
